@@ -1,0 +1,872 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+  /* Αποκλειστικά Μωβ, Ροζ και Μπλε */
+  --bg-color: #190a2a;
+  /* Βαθύ διαστημικό μωβ */
+  --surface-color: #2b1744;
+  /* Λίγο πιο φωτεινό μωβ για τα παράθυρα */
+  --text-color: #f7e6ff;
+  /* Αχνό παστέλ ροζ/μωβ για κείμενο (αντί για λευκό) */
+  --border-color: #d18cff;
+  /* Φωτεινό παστέλ μωβ για περιγράμματα */
+  --shadow-color: #0b0414;
+  /* Πολύ σκούρο μωβ για τις σκιές */
+
+  /* Χρώματα Δραστηριοτήτων (Παστέλ) */
+  --pastel-blue: #7cd6ff;
+  /* Study - Παστέλ μπλε */
+  --pastel-pink: #ff9ced;
+  /* Workout - Παστέλ ροζ */
+  --pastel-purple: #b678ff;
+  /* Hobby - Παστέλ μωβ */
+
+  /* Κουμπιά & Δράσεις */
+  --action-close: #ff6bb3;
+  /* Ζωηρό ροζ για κλείσιμο/διαγραφή */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--text-color);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  background-color: var(--bg-color);
+  background-image: radial-gradient(circle at 50% 0%, #2b1744 0%, var(--bg-color) 70%);
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- HEADER & LEVEL BAR --- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+.level-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.level-icon {
+  background: var(--surface-color);
+  border: 3px solid var(--border-color);
+  border-radius: 4px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: var(--pastel-pink);
+  box-shadow: 3px 3px 0px var(--shadow-color);
+}
+
+.level-bar-container {
+  border: 3px solid var(--border-color);
+  background-color: var(--shadow-color);
+  height: 25px;
+  width: 300px;
+  position: relative;
+  box-shadow: 3px 3px 0px var(--shadow-color);
+}
+
+.level-bar-fill {
+  background: var(--pastel-blue);
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.level-text {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--pastel-blue);
+  text-shadow: 2px 2px 0px var(--shadow-color);
+}
+
+/* --- BUTTONS --- */
+.menu-btn,
+.nav-btn,
+.action-btn,
+.close-btn {
+  background: var(--surface-color);
+  border: 3px solid var(--border-color);
+  color: var(--text-color);
+  cursor: pointer;
+  box-shadow: 3px 3px 0px var(--shadow-color);
+  font-family: 'Press Start 2P', monospace;
+}
+
+.menu-btn {
+  padding: 8px 12px;
+  font-size: 16px;
+  color: var(--pastel-pink);
+  border-color: var(--pastel-pink);
+}
+
+.nav-btn {
+  padding: 5px;
+}
+
+.action-btn {
+  padding: 12px;
+  font-size: 9px;
+}
+
+.close-btn {
+  background: var(--action-close);
+  color: var(--shadow-color);
+  padding: 4px;
+  border-color: var(--shadow-color);
+}
+
+button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px var(--shadow-color);
+}
+
+/* --- MAIN & MENU STACK --- */
+.main-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.character-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+svg {
+  stroke: var(--pastel-blue);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  fill: var(--surface-color);
+  filter: drop-shadow(4px 4px 0px var(--shadow-color));
+  animation: float 2.5s ease-in-out infinite;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.menu-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 250px;
+}
+
+.menu-item {
+  background-color: var(--surface-color);
+  color: var(--pastel-blue);
+  border: 3px solid var(--pastel-blue);
+  padding: 15px 10px;
+  cursor: pointer;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  text-align: center;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+  transition: transform 0.1s, background-color 0.2s;
+}
+
+.menu-item:nth-child(even) {
+  color: var(--pastel-pink);
+  border-color: var(--pastel-pink);
+}
+
+.menu-item:hover {
+  background-color: var(--pastel-purple);
+  border-color: var(--pastel-purple);
+  color: var(--shadow-color);
+}
+
+.menu-item:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px var(--shadow-color);
+}
+
+/* --- MODALS --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(25, 10, 42, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.retro-modal {
+  background-color: var(--surface-color);
+  border: 4px solid var(--border-color);
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 6px 6px 0px var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  background-color: var(--border-color);
+  color: var(--shadow-color);
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 4px solid var(--shadow-color);
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.setup-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.retro-input {
+  background: var(--bg-color);
+  color: var(--pastel-blue);
+  border: 3px solid var(--pastel-purple);
+  padding: 10px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  outline: none;
+  box-shadow: inset 3px 3px 0px var(--shadow-color);
+}
+
+.retro-input::placeholder {
+  color: #6a4c8a;
+}
+
+/* --- QUIZ TINDER CARDS --- */
+.tinder-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.card-stack {
+  position: relative;
+  width: 250px;
+  height: 300px;
+  margin-top: 10px;
+}
+
+.swipe-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.quiz-card-content {
+  background-color: var(--bg-color);
+  border: 4px solid var(--pastel-blue);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+  border-radius: 8px;
+  cursor: grab;
+}
+
+.quiz-card-content:active {
+  cursor: grabbing;
+}
+
+.quiz-card-content h3 {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--pastel-pink);
+  text-align: center;
+  word-wrap: break-word;
+}
+
+.loading-text {
+  animation: retroBlink 1s infinite;
+  color: var(--pastel-blue);
+}
+
+@keyframes retroBlink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.mistake-item {
+  border: 2px solid var(--action-close);
+  padding: 10px;
+  margin-top: 10px;
+  background-color: var(--bg-color);
+}
+
+/* --- TO DO LIST --- */
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.todo-item {
+  border: 2px solid var(--pastel-purple);
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-color);
+  box-shadow: 3px 3px 0px var(--shadow-color);
+}
+
+.todo-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-title {
+  color: var(--pastel-pink);
+  font-size: 10px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.todo-desc {
+  color: var(--text-color);
+  font-size: 7px;
+  line-height: 1.3;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.todo-date {
+  color: var(--pastel-blue);
+  font-size: 7px;
+}
+
+/* --- STATS & GOALS --- */
+.bg-study {
+  background-color: var(--pastel-blue);
+  border-color: var(--shadow-color);
+}
+
+.bg-workout {
+  background-color: var(--pastel-pink);
+  border-color: var(--shadow-color);
+}
+
+.bg-hobby {
+  background-color: var(--pastel-purple);
+  border-color: var(--shadow-color);
+}
+
+.chart-container {
+  display: flex;
+  height: 180px;
+  border-bottom: 3px solid var(--pastel-purple);
+  border-left: 3px solid var(--pastel-purple);
+  padding-bottom: 5px;
+  position: relative;
+}
+
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: 10px;
+  font-size: 7px;
+  text-align: right;
+  height: 100%;
+  color: var(--pastel-purple);
+}
+
+.bars-area {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  flex: 1;
+  height: 100%;
+}
+
+.bar-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 12%;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.bar {
+  width: 100%;
+  transition: height 0.5s ease-in-out;
+  border-top: 2px solid var(--shadow-color);
+}
+
+.day-label {
+  margin-top: 10px;
+  font-size: 6px;
+  color: var(--pastel-blue);
+}
+
+.tooltip-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  cursor: crosshair;
+}
+
+.retro-tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--bg-color);
+  border: 2px solid var(--border-color);
+  padding: 8px;
+  font-size: 7px;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 2px 2px 0px var(--shadow-color);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.retro-tooltip .t-study {
+  color: var(--pastel-blue);
+}
+
+.retro-tooltip .t-workout {
+  color: var(--pastel-pink);
+}
+
+.retro-tooltip .t-hobby {
+  color: var(--pastel-purple);
+}
+
+.tooltip-container:hover .retro-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.goals-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.goal-progress-fill {
+  height: 100%;
+  transition: width 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border-right: 2px solid var(--shadow-color);
+}
+
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 15px;
+    height: 100vh;
+  }
+
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .level-bar-container {
+    width: 100%;
+    max-width: 180px;
+  }
+
+  .main-content {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 30px;
+  }
+
+  .character-container {
+    margin-top: 10px;
+    flex: none;
+  }
+
+  .menu-stack {
+    width: 100%;
+    max-width: 250px;
+  }
+}
+
+/* --- ACTIVITY BUTTONS (TIMER) --- */
+.activity-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.act-btn {
+  background: var(--bg-color);
+  color: var(--pastel-purple);
+  border: 3px solid var(--pastel-purple);
+  padding: 10px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px var(--shadow-color);
+  transition: all 0.2s;
+}
+
+.act-btn:hover {
+  background: var(--surface-color);
+}
+
+.act-btn.active {
+  background: var(--pastel-blue);
+  color: var(--shadow-color);
+  border-color: var(--pastel-blue);
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px var(--shadow-color);
+}
+
+/* --- MONTH NAV (Αποστάσεις στο ημερολόγιο) --- */
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  /* Μεγαλύτερο κενό ανάμεσα στα βελάκια και τον μήνα/χρονιά */
+}
+
+/* --- CHART LEGEND (Τα κουτάκια με τα χρώματα) --- */
+.chart-legend {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  font-size: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-box {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 2px;
+}
+
+/* =========================================
+   ANIMATIONS & ΕΦΕ ΚΙΝΗΣΗΣ
+========================================= */
+
+/* 1. Εφέ Αναπήδησης για όλα τα Παράθυρα (Modals) */
+.retro-modal {
+  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes modalPop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 2. Είσοδος για τα κουμπιά του Μενού (Staggered Slide-in) */
+.menu-item {
+  opacity: 0;
+  /* Ξεκινάνε αόρατα */
+  animation: slideInRight 0.3s forwards;
+}
+
+/* Δίνουμε καθυστέρηση στο καθένα για να μπαίνουν σαν ντόμινο */
+.menu-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.menu-item:nth-child(2) {
+  animation-delay: 0.10s;
+}
+
+.menu-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.menu-item:nth-child(4) {
+  animation-delay: 0.20s;
+}
+
+.menu-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.menu-item:nth-child(6) {
+  animation-delay: 0.30s;
+}
+
+.menu-item:nth-child(7) {
+  animation-delay: 0.35s;
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 3. Εμφάνιση των εργασιών στο To-Do List (Slide-Up) */
+.todo-item {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 4. Μικρό εφέ "παλμού" στο εικονίδιο του Level (!) */
+.level-icon {
+  animation: levelPulse 2s infinite;
+}
+
+@keyframes levelPulse {
+
+  0%,
+  100% {
+    box-shadow: 3px 3px 0px var(--shadow-color);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0px 0px 10px var(--pastel-pink);
+    transform: scale(1.05);
+  }
+}
+
+/* --- ACTIVE TIMER (Όταν μετράει αντίστροφα) --- */
+.active-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.current-activity {
+  color: var(--pastel-pink);
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 0px var(--shadow-color);
+  animation: retroPulse 2s infinite;
+}
+
+.time-display {
+  font-size: 42px;
+  /* Τεράστια ρετρό γράμματα */
+  color: var(--pastel-blue);
+  text-shadow: 4px 4px 0px var(--shadow-color);
+  margin: 15px 0;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  justify-content: center;
+}
+
+.timer-controls .action-btn {
+  flex: 1;
+  /* Κάνει τα κουμπιά PAUSE και STOP να έχουν το ίδιο πλάτος */
+  padding: 15px;
+  font-size: 10px;
+}
+
+/* Ξεχωριστό χρώμα για το STOP για να ξεχωρίζει */
+.stop-btn {
+  background-color: var(--action-close);
+  color: var(--shadow-color);
+  border-color: var(--shadow-color);
+}
+
+@keyframes retroPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+/* --- ΧΡΩΜΑΤΑ ΓΙΑ ΤΙΣ ΜΠΑΡΕΣ ΤΩΝ ΣΤΑΤΙΣΤΙΚΩΝ --- */
+.segment-study {
+  background-color: var(--pastel-blue);
+  border-top: 2px solid var(--shadow-color);
+}
+
+.segment-workout {
+  background-color: var(--pastel-pink);
+  border-top: 2px solid var(--shadow-color);
+}
+
+.segment-hobby {
+  background-color: var(--pastel-purple);
+  border-top: 2px solid var(--shadow-color);
+}
+
+/* --- AUTHENTICATION SCREEN (LOGIN & REGISTER) --- */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+.auth-modal {
+  width: 100%;
+  max-width: 350px;
+}
+
+.auth-error {
+  background: var(--action-close);
+  color: var(--shadow-color);
+  border: 2px solid var(--shadow-color);
+  padding: 10px;
+  font-size: 8px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.auth-toggle {
+  font-size: 8px;
+  color: var(--pastel-blue);
+  text-align: center;
+  margin-top: 20px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.auth-toggle:hover {
+  color: var(--pastel-pink);
+}
+
+/* --- AUTHENTICATION SCREEN (LOGIN & REGISTER) --- */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+.auth-modal {
+  width: 100%;
+  max-width: 350px;
+}
+
+.auth-error {
+  background: var(--action-close);
+  color: var(--shadow-color);
+  border: 2px solid var(--shadow-color);
+  padding: 10px;
+  font-size: 8px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.auth-toggle {
+  font-size: 8px;
+  color: var(--pastel-blue);
+  text-align: center;
+  margin-top: 20px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.auth-toggle:hover {
+  color: var(--pastel-pink);
+}
