@@ -306,6 +306,11 @@ svg {
   box-shadow: 4px 4px 0px var(--shadow-color);
   border-radius: 8px;
   cursor: grab;
+
+  /* Αποτρέπει την επιλογή κειμένου όταν σέρνεις την κάρτα με το ποντίκι! */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
 
 .quiz-card-content:active {
