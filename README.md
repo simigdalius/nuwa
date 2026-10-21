@@ -1,16 +1,24 @@
-# React + Vite
+# Nuwa - Gamified Productivity & Study App 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Το **Nuwa** είναι μια ολοκληρωμένη διαδικτυακή εφαρμογή παραγωγικότητας και μελέτης που μετατρέπει την καθημερινή προσπάθεια σε παιχνίδι (gamification). Οι χρήστες μπορούν να χρονομετρούν τις δραστηριότητές τους, να θέτουν στόχους, να διαχειρίζονται τις εργασίες τους και να δημιουργούν αυτόματα flashcard quizzes μέσω Τεχνητής Νοημοσύνης (AI) από τις σημειώσεις τους.
 
-Currently, two official plugins are available:
+## Βασικά Χαρακτηριστικά ✨
+*   **Σύστημα XP & Leveling:** Κέρδισε πόντους εμπειρίας (XP) και ανέβα επίπεδα (Levels) ολοκληρώνοντας sessions και εργασίες.
+*   **Activity Timer & Στατιστικά:** Χρονόμετρο για Study, Workout και Hobby, με αυτόματη καταγραφή και οπτικοποίηση δεδομένων ανά εβδομάδα.
+*   **To-Do List & Weekly Goals:** Θέσε εβδομαδιαίους στόχους σε ώρες και διαχειρίσου τις εργασίες σου με προθεσμίες.
+*   **AI Quiz Generator:** Ανέβασε τις σημειώσεις σου (PDF ή TXT) και η εφαρμογή (μέσω Google Gemini API) δημιουργεί αυτόματα ένα διαδραστικό "Tinder-style" swipe quiz ερωτήσεων Σωστού/Λάθους.
+*   **Αποθήκευση Quizzes:** Αποθήκευσε τα αγαπημένα σου AI Quizzes για μελλοντική επανάληψη.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Τεχνολογίες που χρησιμοποιήθηκαν 🛠️
+*   **Frontend:** React, Vite, CSS, React-Tinder-Card
+*   **Backend:** Node.js, Express.js
+*   **Βάση Δεδομένων:** SQLite
+*   **AI Integration:** Google Gemini API (`gemini-flash-latest`)
+*   **Άλλα Εργαλεία:** Multer, pdf-parse, Dotenv
 
-## React Compiler
+## Οδηγίες Εγκατάστασης (Τοπικά) 💻
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **Κλωνοποίηση του αποθετηρίου:**
+   ```bash
+   git clone [https://github.com/simigdalius/nuwa.git](https://github.com/simigdalius/nuwa.git)
+   cd nuwa/vite-project
