@@ -10,7 +10,7 @@ const dayNamesGreek = ['Κυρ', 'Δευ', 'Τρί', 'Τετ', 'Πέμ', 'Παρ
 
 function App() {
   const [user, setUser] = useState(null);
-  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [authMode, setAuthMode] = useState('login'); // 'login', 'register', 'reset'
   const [authForm, setAuthForm] = useState({ username: '', email: '', password: '' });
   const [authError, setAuthError] = useState('');
 
@@ -62,7 +62,7 @@ function App() {
   const addXP = async (amount) => {
     if (!user) return;
     try {
-      const res = await fetch('http://localhost:3001/api/xp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, xpToAdd: amount }) });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/xp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, xpToAdd: amount }) });
       const data = await res.json();
       if (data.success) { setXp(data.xp); setLevel(data.level); }
     } catch (err) { }
@@ -71,7 +71,7 @@ function App() {
   const fetchStats = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`http://localhost:3001/api/stats?userId=${user.id}&startDate=${startStr}&endDate=${endStr}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/stats?userId=${user.id}&startDate=${startStr}&endDate=${endStr}`);
       setStats(await response.json());
     } catch (error) { }
   };
@@ -81,7 +81,7 @@ function App() {
   const fetchGoals = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`http://localhost:3001/api/goals?userId=${user.id}&weekStart=${startStr}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/goals?userId=${user.id}&weekStart=${startStr}`);
       const data = await response.json();
       setSavedGoals({ Study: data.study_goal, Workout: data.workout_goal, Hobby: data.hobby_goal });
       setGoalsForm({ Study: data.study_goal || '', Workout: data.workout_goal || '', Hobby: data.hobby_goal || '' });
@@ -94,7 +94,7 @@ function App() {
 
   const handleSaveGoals = async () => {
     try {
-      await fetch('http://localhost:3001/api/goals', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, weekStart: startStr, studyGoal: parseFloat(goalsForm.Study) || 0, workoutGoal: parseFloat(goalsForm.Workout) || 0, hobbyGoal: parseFloat(goalsForm.Hobby) || 0 }) });
+      await fetch(`${import.meta.env.VITE_API_URL}/api/goals`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, weekStart: startStr, studyGoal: parseFloat(goalsForm.Study) || 0, workoutGoal: parseFloat(goalsForm.Workout) || 0, hobbyGoal: parseFloat(goalsForm.Hobby) || 0 }) });
       alert('Οι στόχοι αποθηκεύτηκαν!'); fetchGoals();
     } catch (err) { }
   };
@@ -105,7 +105,7 @@ function App() {
     if (elapsedSeconds <= 0) return;
     const elapsedHours = elapsedSeconds / 3600;
     try {
-      await fetch('http://localhost:3001/api/stats', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, date: formatDateStr(new Date()), activity, hours: elapsedHours }) });
+      await fetch(`${import.meta.env.VITE_API_URL}/api/stats`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, date: formatDateStr(new Date()), activity, hours: elapsedHours }) });
       if (showStatsModal || showGoalsModal) fetchStats();
     } catch (error) { }
   };
@@ -123,26 +123,26 @@ function App() {
 
   const fetchTodos = async () => {
     if (!user) return;
-    try { const response = await fetch(`http://localhost:3001/api/todos?userId=${user.id}`); setTodos(await response.json()); } catch (err) { }
+    try { const response = await fetch(`${import.meta.env.VITE_API_URL}/api/todos?userId=${user.id}`); setTodos(await response.json()); } catch (err) { }
   };
 
   const handleAddTodo = async () => {
     if (!todoForm.title) return alert("Βάλε τίτλο!");
     try {
-      await fetch('http://localhost:3001/api/todos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, ...todoForm }) });
+      await fetch(`${import.meta.env.VITE_API_URL}/api/todos`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, ...todoForm }) });
       setTodoForm({ title: '', description: '', deadline: '' }); await fetchTodos(); setTodoMode('list');
     } catch (err) { }
   };
 
   const handleCompleteTodo = async (id) => {
-    try { await fetch(`http://localhost:3001/api/todos/${id}`, { method: 'DELETE' }); addXP(50); fetchTodos(); } catch (err) { }
+    try { await fetch(`${import.meta.env.VITE_API_URL}/api/todos/${id}`, { method: 'DELETE' }); addXP(50); fetchTodos(); } catch (err) { }
   };
 
   // --- QUIZ LOGIC ---
   const fetchQuizzes = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`http://localhost:3001/api/quizzes?userId=${user.id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/quizzes?userId=${user.id}`);
       setSavedQuizzes(await response.json());
     } catch (err) { }
   };
@@ -153,7 +153,7 @@ function App() {
     const formData = new FormData();
     formData.append('document', quizFile);
     try {
-      const response = await fetch('http://localhost:3001/api/create-quiz', { method: 'POST', body: formData });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/create-quiz`, { method: 'POST', body: formData });
       const data = await response.json();
       if (data.error) throw new Error(data.error);
       setQuizQuestions(data.questions.reverse());
@@ -168,7 +168,7 @@ function App() {
   const handleSaveQuiz = async () => {
     if (!quizTitle) return alert("Βάλε ένα όνομα για να το αποθηκεύσεις!");
     try {
-      await fetch('http://localhost:3001/api/quizzes', {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/quizzes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, title: quizTitle, questions: quizQuestions })
@@ -188,7 +188,7 @@ function App() {
   };
 
   const deleteSavedQuiz = async (id) => {
-    try { await fetch(`http://localhost:3001/api/quizzes/${id}`, { method: 'DELETE' }); fetchQuizzes(); } catch (err) { }
+    try { await fetch(`${import.meta.env.VITE_API_URL}/api/quizzes/${id}`, { method: 'DELETE' }); fetchQuizzes(); } catch (err) { }
   };
 
   const handleSwipe = (direction, questionObj) => {
@@ -209,9 +209,25 @@ function App() {
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setAuthError('');
-    const endpoint = isLoginMode ? '/api/login' : '/api/register';
+
+    // Λογική για το Reset Password
+    if (authMode === 'reset') {
+      if (authForm.password.length < 8) return setAuthError('Ο νέος κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.');
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reset-password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: authForm.email, newPassword: authForm.password }) });
+        const data = await response.json();
+        if (data.error) setAuthError(data.error);
+        else { alert('Ο κωδικός άλλαξε επιτυχώς!'); setAuthMode('login'); setAuthForm({ username: '', email: '', password: '' }); }
+      } catch (err) { setAuthError('Πρόβλημα σύνδεσης.'); }
+      return;
+    }
+
+    // Λογική για το Register / Login
+    if (authMode === 'register' && authForm.password.length < 8) return setAuthError('Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.');
+
+    const endpoint = authMode === 'login' ? '/api/login' : '/api/register';
     try {
-      const response = await fetch(`http://localhost:3001${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
+      const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
       const data = await response.json();
       if (data.error) setAuthError(data.error);
       else { setUser(data.user); setXp(data.user.xp || 0); setLevel(data.user.level || 1); setAuthForm({ username: '', email: '', password: '' }); }
@@ -231,14 +247,47 @@ function App() {
     return (
       <div className="app-container auth-container">
         <div className="retro-modal auth-modal">
-          <div className="modal-header"><span>{isLoginMode ? 'LOGIN' : 'REGISTER'}</span></div>
+          <div className="modal-header">
+            <span>{authMode === 'login' ? 'LOGIN' : authMode === 'register' ? 'REGISTER' : 'RESET PASSWORD'}</span>
+          </div>
           <form className="modal-body" onSubmit={handleAuthSubmit}>
             {authError && <div className="auth-error">{authError}</div>}
-            <div className="setup-group"><label>USERNAME:</label><input type="text" className="retro-input" value={authForm.username} onChange={e => setAuthForm({ ...authForm, username: e.target.value })} required /></div>
-            {!isLoginMode && <div className="setup-group"><label>EMAIL:</label><input type="email" className="retro-input" value={authForm.email} onChange={e => setAuthForm({ ...authForm, email: e.target.value })} required /></div>}
-            <div className="setup-group"><label>PASSWORD:</label><input type="password" className="retro-input" value={authForm.password} onChange={e => setAuthForm({ ...authForm, password: e.target.value })} required /></div>
-            <button type="submit" className="action-btn start-btn" style={{ marginTop: '10px' }}>{isLoginMode ? 'ENTER' : 'CREATE ACCOUNT'}</button>
-            <p className="auth-toggle" onClick={() => { setIsLoginMode(!isLoginMode); setAuthError(''); }}>{isLoginMode ? "Δεν έχεις λογαριασμό; Register" : "Έχεις ήδη λογαριασμό; Login"}</p>
+
+            {authMode !== 'reset' && (
+              <div className="setup-group">
+                <label>USERNAME:</label>
+                <input type="text" className="retro-input" value={authForm.username} onChange={e => setAuthForm({ ...authForm, username: e.target.value })} required={authMode !== 'reset'} />
+              </div>
+            )}
+
+            {authMode !== 'login' && (
+              <div className="setup-group">
+                <label>EMAIL:</label>
+                <input type="email" className="retro-input" value={authForm.email} onChange={e => setAuthForm({ ...authForm, email: e.target.value })} required />
+              </div>
+            )}
+
+            <div className="setup-group">
+              <label>{authMode === 'reset' ? 'NEW PASSWORD:' : 'PASSWORD:'}</label>
+              <input type="password" minLength="8" className="retro-input" value={authForm.password} onChange={e => setAuthForm({ ...authForm, password: e.target.value })} required />
+              {(authMode === 'register' || authMode === 'reset') && <span style={{ fontSize: '8px', color: 'var(--pastel-blue)' }}>Μίνιμουμ 8 χαρακτήρες</span>}
+            </div>
+
+            <button type="submit" className="action-btn start-btn" style={{ marginTop: '10px' }}>
+              {authMode === 'login' ? 'ENTER' : authMode === 'register' ? 'CREATE ACCOUNT' : 'UPDATE PASSWORD'}
+            </button>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '15px', alignItems: 'center' }}>
+              {authMode === 'login' && (
+                <>
+                  <p className="auth-toggle" onClick={() => { setAuthMode('register'); setAuthError(''); setAuthForm({ username: '', email: '', password: '' }); }}>Δεν έχεις λογαριασμό; Register</p>
+                  <p className="auth-toggle" style={{ color: 'var(--pastel-pink)' }} onClick={() => { setAuthMode('reset'); setAuthError(''); setAuthForm({ username: '', email: '', password: '' }); }}>Ξέχασες τον κωδικό σου;</p>
+                </>
+              )}
+              {authMode !== 'login' && (
+                <p className="auth-toggle" onClick={() => { setAuthMode('login'); setAuthError(''); setAuthForm({ username: '', email: '', password: '' }); }}>Πίσω στο Login</p>
+              )}
+            </div>
           </form>
         </div>
       </div>

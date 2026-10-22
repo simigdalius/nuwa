@@ -29,18 +29,35 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS saved_quizzes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, title TEXT, questions TEXT)`);
 });
 
-// --- AUTH, XP, STATS, TODOS, GOALS (Παραμένουν ίδια) ---
+
+// --- AUTH, XP, STATS, TODOS, GOALS ---
+
 app.post('/api/register', (req, res) => {
     const { username, email, password } = req.body;
+    if (!password || password.length < 8) return res.status(400).json({ error: 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες!' });
+
     db.run(`INSERT INTO users (username, email, password, xp, level) VALUES (?, ?, ?, 0, 1)`, [username, email, password], function (err) {
         if (err) return res.status(400).json({ error: 'Το Username ή το Email υπάρχει ήδη!' });
         res.json({ success: true, user: { id: this.lastID, username, email, xp: 0, level: 1 } });
     });
 });
+
 app.post('/api/login', (req, res) => {
     db.get(`SELECT id, username, email, xp, level FROM users WHERE username = ? AND password = ?`, [req.body.username, req.body.password], (err, row) => {
         if (err || !row) return res.status(401).json({ error: 'Λάθος στοιχεία!' });
         res.json({ success: true, user: row });
+    });
+});
+
+// ΝΕΟ ENDPOINT: Αλλαγή Κωδικού
+app.post('/api/reset-password', (req, res) => {
+    const { email, newPassword } = req.body;
+    if (!newPassword || newPassword.length < 8) return res.status(400).json({ error: 'Ο νέος κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες!' });
+
+    db.run(`UPDATE users SET password = ? WHERE email = ?`, [newPassword, email], function (err) {
+        if (err) return res.status(500).json({ error: 'Σφάλμα βάσης δεδομένων.' });
+        if (this.changes === 0) return res.status(404).json({ error: 'Δεν βρέθηκε χρήστης με αυτό το email!' });
+        res.json({ success: true });
     });
 });
 app.post('/api/xp', (req, res) => {
