@@ -131,4 +131,5 @@ app.post('/api/create-quiz', upload.single('document'), async (req, res) => {
     }
 });
 
-app.listen(3001, () => console.log('Ο server τρέχει στο http://localhost:3001'));
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`Ο server τρέχει στο port ${PORT}`));
