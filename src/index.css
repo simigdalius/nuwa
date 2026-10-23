@@ -875,3 +875,40 @@ svg {
 .auth-toggle:hover {
   color: var(--pastel-pink);
 }
+
+/* Κίνηση αιώρησης για το Avatar */
+@keyframes floatAvatar {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+
+  /* Ανεβαίνει λίγο πάνω */
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animated-avatar {
+  width: 150px;
+  height: 200px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  /* Εφαρμογή της κίνησης: διαρκεί 3 δευτερόλεπτα και επαναλαμβάνεται άπειρα */
+  animation: floatAvatar 3s ease-in-out infinite;
+  /* Το drop-shadow αγκαλιάζει το PNG (ακόμα και τα διάφανα μέρη) */
+  filter: drop-shadow(0px 8px 10px rgba(0, 0, 0, 0.85));
+}
+
+/* Στυλ για τα ολοκληρωμένα To-Do */
+.todo-item.completed {
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
+
+.todo-item.completed .todo-title {
+  text-decoration: line-through;
+}

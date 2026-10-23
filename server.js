@@ -22,7 +22,18 @@ const db = new sqlite3.Database('./nuwa.sqlite', (err) => {
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, email TEXT UNIQUE, password TEXT, xp INTEGER DEFAULT 0, level INTEGER DEFAULT 1)`);
     db.run(`CREATE TABLE IF NOT EXISTS daily_stats (user_id INTEGER, date TEXT, activity TEXT, hours REAL)`);
-    db.run(`CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, title TEXT, description TEXT, deadline TEXT)`);
+    db.run(`CREATE TABLE IF NOT EXISTS todos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, 
+  user_id INTEGER, 
+  title TEXT, 
+  description TEXT, 
+  deadline TEXT, 
+  completed INTEGER DEFAULT 0
+)`);
+
+    db.run(`ALTER TABLE todos ADD COLUMN completed INTEGER DEFAULT 0`, (err) => {
+        // Αγνοούμε το σφάλμα σε περίπτωση που η στήλη έχει ήδη προστεθεί από προηγούμενο τρέξιμο
+    });
     db.run(`CREATE TABLE IF NOT EXISTS weekly_goals (user_id INTEGER, week_start TEXT, study_goal REAL, workout_goal REAL, hobby_goal REAL)`);
 
     // Νέος πίνακας για τα αποθηκευμένα Quizzes
@@ -83,7 +94,11 @@ app.post('/api/stats', (req, res) => {
 });
 app.get('/api/todos', (req, res) => { db.all("SELECT * FROM todos WHERE user_id = ?", [req.query.userId], (err, rows) => res.json(rows)); });
 app.post('/api/todos', (req, res) => { db.run("INSERT INTO todos (user_id, title, description, deadline) VALUES (?, ?, ?, ?)", [req.body.userId, req.body.title, req.body.description, req.body.deadline], function () { res.json({ success: true }); }); });
-app.delete('/api/todos/:id', (req, res) => { db.run("DELETE FROM todos WHERE id = ?", [req.params.id], () => res.json({ success: true })); });
+app.put('/api/todos/:id', (req, res) => {
+    db.run("UPDATE todos SET completed = 1 WHERE id = ?", [req.params.id], () => {
+        res.json({ success: true });
+    });
+});
 app.get('/api/goals', (req, res) => { db.get("SELECT * FROM weekly_goals WHERE user_id = ? AND week_start = ?", [req.query.userId, req.query.weekStart], (err, row) => res.json(row || { study_goal: 0, workout_goal: 0, hobby_goal: 0 })); });
 app.post('/api/goals', (req, res) => {
     db.get("SELECT * FROM weekly_goals WHERE user_id = ? AND week_start = ?", [req.body.userId, req.body.weekStart], (err, row) => {

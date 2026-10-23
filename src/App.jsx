@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import TinderCard from 'react-tinder-card';
 import './index.css';
+import lvl1 from './img/lvl1.png';
+import lvl6 from './img/lvl6.png';
+import lvl11 from './img/lvl11.png';
+import lvl16 from './img/lvl16.png';
+import lvl21 from './img/lvl21.png';
+import lvl26 from './img/lvl26.png';
+import lvl31 from './img/lvl31.png';
 
 const getStartOfWeek = (date) => { const d = new Date(date); const day = d.getDay(); const diff = d.getDate() - day + (day === 0 ? -6 : 1); return new Date(d.setDate(diff)); };
 const formatDateStr = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -13,6 +20,17 @@ function App() {
   const [authMode, setAuthMode] = useState('login'); // 'login', 'register', 'reset'
   const [authForm, setAuthForm] = useState({ username: '', email: '', password: '' });
   const [authError, setAuthError] = useState('');
+
+  // --- AVATAR EVOLUTION LOGIC ---
+  const getAvatarImage = (currentLevel) => {
+    if (currentLevel >= 31) return lvl31;
+    if (currentLevel >= 26) return lvl26;
+    if (currentLevel >= 21) return lvl21;
+    if (currentLevel >= 16) return lvl16;
+    if (currentLevel >= 11) return lvl11;
+    if (currentLevel >= 6) return lvl6;
+    return lvl1;
+  };
 
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
@@ -64,7 +82,20 @@ function App() {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/xp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, xpToAdd: amount }) });
       const data = await res.json();
-      if (data.success) { setXp(data.xp); setLevel(data.level); }
+      if (data.success) {
+        const oldLevel = level; // Κρατάμε το προηγούμενο level για σύγκριση
+        setXp(data.xp);
+        setLevel(data.level);
+
+        // Έλεγχος για εξέλιξη (Evolution)
+        const milestones = [6, 11, 16, 21, 26, 31];
+        const crossedMilestone = milestones.find(m => data.level >= m && oldLevel < m);
+
+        if (crossedMilestone) {
+          // Μικρή καθυστέρηση για να προλάβει να αλλάξει πρώτα η εικόνα στο background
+          setTimeout(() => alert('Nuwa evolved! Congrats on your work 🎉'), 100);
+        }
+      }
     } catch (err) { }
   };
 
@@ -135,7 +166,12 @@ function App() {
   };
 
   const handleCompleteTodo = async (id) => {
-    try { await fetch(`${import.meta.env.VITE_API_URL}/api/todos/${id}`, { method: 'DELETE' }); addXP(50); fetchTodos(); } catch (err) { }
+    try {
+      // Αλλάξαμε τη μέθοδο σε PUT
+      await fetch(`${import.meta.env.VITE_API_URL}/api/todos/${id}`, { method: 'PUT' });
+      addXP(50);
+      fetchTodos();
+    } catch (err) { }
   };
 
   // --- QUIZ LOGIC ---
@@ -309,15 +345,11 @@ function App() {
 
       <main className="main-content">
         <div className="character-container">
-          <svg width="150" height="200" viewBox="0 0 100 150" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" style={{ shapeRendering: 'crispEdges' }}>
-            <ellipse cx="50" cy="70" rx="40" ry="35" />
-            <rect x="25" y="20" width="10" height="20" rx="2" />
-            <rect x="65" y="20" width="10" height="20" rx="2" />
-            <circle cx="40" cy="65" r="5" />
-            <circle cx="60" cy="65" r="5" />
-            <path d="M 45 80 Q 50 90 55 80" fill="none" strokeWidth="3" />
-            <path d="M 35 100 L 40 140 L 50 120 L 60 140 L 65 100" fill="none" strokeWidth="3" />
-          </svg>
+          <img
+            src={getAvatarImage(level)}
+            alt={`Nuwa Level ${level}`}
+            className="animated-avatar"
+          />
         </div>
 
         {isMenuOpen && (
@@ -327,221 +359,186 @@ function App() {
             <button className="menu-item" onClick={() => { setShowTodoModal(true); setTodoMode('menu'); }}>to do</button>
             <button className="menu-item" onClick={() => setShowGoalsModal(true)}>Week goals</button>
             <button className="menu-item" onClick={() => { setShowQuizModal(true); setQuizState('menu'); }} style={{ borderColor: '#ffcc00', color: '#ffcc00' }}>AI Quiz</button>
-
             <button className="menu-item" onClick={handleLogout} style={{ borderColor: '#ff6bb3', color: '#ff6bb3' }}>Logout</button>
           </div>
         )}
       </main>
 
+
       {/* --- AI QUIZ MODAL --- */}
-      {showQuizModal && (
-        <div className="modal-overlay">
-          <div className="retro-modal quiz-modal">
-            <div className="modal-header"><span>AI QUIZ</span><button className="close-btn" onClick={() => setShowQuizModal(false)}>X</button></div>
-            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+      {
+        showQuizModal && (
+          <div className="modal-overlay">
+            <div className="retro-modal quiz-modal">
+              <div className="modal-header"><span>AI QUIZ</span><button className="close-btn" onClick={() => setShowQuizModal(false)}>X</button></div>
+              <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
 
-              {quizState === 'menu' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <button className="action-btn" onClick={() => setQuizState('upload')} style={{ borderColor: 'var(--pastel-blue)', color: 'var(--pastel-blue)' }}>CREATE NEW</button>
-                  <button className="action-btn" onClick={() => { setQuizState('saved_list'); fetchQuizzes(); }} style={{ borderColor: 'var(--pastel-pink)', color: 'var(--pastel-pink)' }}>SAVED QUIZZES</button>
-                </div>
-              )}
-
-              {quizState === 'saved_list' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  {savedQuizzes.length === 0 ? (
-                    <p style={{ textAlign: 'center', fontSize: '10px', color: 'var(--pastel-blue)' }}>Δεν έχεις αποθηκευμένα quiz!</p>
-                  ) : (
-                    <div className="todo-list">
-                      {savedQuizzes.map(quiz => (
-                        <div key={quiz.id} className="todo-item">
-                          <div className="todo-content"><span className="todo-title">{quiz.title}</span><span className="todo-desc">{JSON.parse(quiz.questions).length} Ερωτήσεις</span></div>
-                          <div style={{ display: 'flex', gap: '5px' }}>
-                            <button className="nav-btn" style={{ borderColor: '#ffcc00', color: '#ffcc00' }} onClick={() => playSavedQuiz(quiz)}>PLAY</button>
-                            <button className="nav-btn" style={{ borderColor: 'var(--action-close)', color: 'var(--action-close)' }} onClick={() => deleteSavedQuiz(quiz.id)}>X</button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <button className="action-btn" onClick={() => setQuizState('menu')} style={{ marginTop: '10px' }}>BACK</button>
-                </div>
-              )}
-
-              {quizState === 'upload' && (
-                <div className="setup-group" style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: '10px', marginBottom: '20px' }}>Ανέβασε τις σημειώσεις σου (.txt, .pdf) και το AI θα φτιάξει ένα τεστ για εσένα!</p>
-                  <input type="file" accept=".txt,.pdf" onChange={(e) => setQuizFile(e.target.files[0])} className="retro-input" style={{ marginBottom: '20px' }} />
-                  <button className="action-btn start-btn" onClick={handleQuizUpload}>CREATE QUIZ</button>
-                  <button className="action-btn" onClick={() => setQuizState('menu')} style={{ marginTop: '10px' }}>BACK</button>
-                </div>
-              )}
-
-              {quizState === 'loading' && <div style={{ textAlign: 'center', padding: '40px' }}><p className="loading-text" style={{ color: 'var(--pastel-blue)' }}>Το AI διαβάζει το αρχείο σου...</p></div>}
-
-              {quizState === 'playing' && (
-                <div className="tinder-container">
-                  <p style={{ fontSize: '8px', textAlign: 'center', marginBottom: '10px' }}>Swipe Δεξιά για ΣΩΣΤΟ, Αριστερά για ΛΑΘΟΣ</p>
-                  <div className="card-stack">
-                    {quizQuestions.map((q, index) => (
-                      <TinderCard key={index} className="swipe-card" onSwipe={(dir) => handleSwipe(dir, q)} preventSwipe={['up', 'down']}>
-                        <div className="quiz-card-content"><h3>{q.question}</h3></div>
-                      </TinderCard>
-                    ))}
+                {quizState === 'menu' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <button className="action-btn" onClick={() => setQuizState('upload')} style={{ borderColor: 'var(--pastel-blue)', color: 'var(--pastel-blue)' }}>CREATE NEW</button>
+                    <button className="action-btn" onClick={() => { setQuizState('saved_list'); fetchQuizzes(); }} style={{ borderColor: 'var(--pastel-pink)', color: 'var(--pastel-pink)' }}>SAVED QUIZZES</button>
                   </div>
-                </div>
-              )}
+                )}
 
-              {quizState === 'results' && (
-                <div className="results-container">
-                  <h2 style={{ color: '#00ff00', textAlign: 'center' }}>Αποτέλεσμα: {quizResults.correct} / {quizQuestions.length}</h2>
-                  {quizResults.mistakes.length > 0 ? (
-                    <div style={{ marginTop: '20px' }}>
-                      <h3 style={{ color: 'var(--action-close)', fontSize: '12px' }}>Λάθη & Επεξηγήσεις:</h3>
-                      {quizResults.mistakes.map((m, i) => (
-                        <div key={i} className="mistake-item">
-                          <p style={{ color: 'var(--pastel-pink)', fontSize: '10px' }}>{m.question}</p>
-                          <p style={{ fontSize: '8px' }}>Η απάντησή σου: {m.userAnswer ? 'Σωστό' : 'Λάθος'}</p>
-                          <p style={{ fontSize: '8px', color: 'var(--pastel-blue)' }}>{m.explanation}</p>
-                        </div>
+                {quizState === 'saved_list' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {savedQuizzes.length === 0 ? (
+                      <p style={{ textAlign: 'center', fontSize: '10px', color: 'var(--pastel-blue)' }}>Δεν έχεις αποθηκευμένα quiz!</p>
+                    ) : (
+                      <div className="todo-list">
+                        {savedQuizzes.map(quiz => (
+                          <div key={quiz.id} className="todo-item">
+                            <div className="todo-content"><span className="todo-title">{quiz.title}</span><span className="todo-desc">{JSON.parse(quiz.questions).length} Ερωτήσεις</span></div>
+                            <div style={{ display: 'flex', gap: '5px' }}>
+                              <button className="nav-btn" style={{ borderColor: '#ffcc00', color: '#ffcc00' }} onClick={() => playSavedQuiz(quiz)}>PLAY</button>
+                              <button className="nav-btn" style={{ borderColor: 'var(--action-close)', color: 'var(--action-close)' }} onClick={() => deleteSavedQuiz(quiz.id)}>X</button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <button className="action-btn" onClick={() => setQuizState('menu')} style={{ marginTop: '10px' }}>BACK</button>
+                  </div>
+                )}
+
+                {quizState === 'upload' && (
+                  <div className="setup-group" style={{ textAlign: 'center' }}>
+                    <p style={{ fontSize: '10px', marginBottom: '20px' }}>Ανέβασε τις σημειώσεις σου (.txt, .pdf) και το AI θα φτιάξει ένα τεστ για εσένα!</p>
+                    <input type="file" accept=".txt,.pdf" onChange={(e) => setQuizFile(e.target.files[0])} className="retro-input" style={{ marginBottom: '20px' }} />
+                    <button className="action-btn start-btn" onClick={handleQuizUpload}>CREATE QUIZ</button>
+                    <button className="action-btn" onClick={() => setQuizState('menu')} style={{ marginTop: '10px' }}>BACK</button>
+                  </div>
+                )}
+
+                {quizState === 'loading' && <div style={{ textAlign: 'center', padding: '40px' }}><p className="loading-text" style={{ color: 'var(--pastel-blue)' }}>Το AI διαβάζει το αρχείο σου...</p></div>}
+
+                {quizState === 'playing' && (
+                  <div className="tinder-container">
+                    <p style={{ fontSize: '8px', textAlign: 'center', marginBottom: '10px' }}>Swipe Δεξιά για ΣΩΣΤΟ, Αριστερά για ΛΑΘΟΣ</p>
+                    <div className="card-stack">
+                      {quizQuestions.map((q, index) => (
+                        <TinderCard key={index} className="swipe-card" onSwipe={(dir) => handleSwipe(dir, q)} preventSwipe={['up', 'down']}>
+                          <div className="quiz-card-content"><h3>{q.question}</h3></div>
+                        </TinderCard>
                       ))}
                     </div>
-                  ) : <p style={{ textAlign: 'center', color: '#00ff00', marginTop: '20px' }}>Απόλυτο Άριστα!</p>}
+                  </div>
+                )}
 
-                  {/* Μόνο αν το Quiz δεν είναι ήδη αποθηκευμένο, εμφανίζεται η επιλογή αποθήκευσης */}
-                  {!currentQuizId && (
-                    <div className="setup-group" style={{ marginTop: '20px' }}>
-                      <input type="text" className="retro-input" placeholder="Όνομα Quiz (π.χ. Ιστορία Κεφ 1)" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} />
-                      <button className="action-btn start-btn" onClick={handleSaveQuiz}>SAVE QUIZ</button>
-                    </div>
-                  )}
+                {quizState === 'results' && (
+                  <div className="results-container">
+                    <h2 style={{ color: '#00ff00', textAlign: 'center' }}>Αποτέλεσμα: {quizResults.correct} / {quizQuestions.length}</h2>
+                    {quizResults.mistakes.length > 0 ? (
+                      <div style={{ marginTop: '20px' }}>
+                        <h3 style={{ color: 'var(--action-close)', fontSize: '12px' }}>Λάθη & Επεξηγήσεις:</h3>
+                        {quizResults.mistakes.map((m, i) => (
+                          <div key={i} className="mistake-item">
+                            <p style={{ color: 'var(--pastel-pink)', fontSize: '10px' }}>{m.question}</p>
+                            <p style={{ fontSize: '8px' }}>Η απάντησή σου: {m.userAnswer ? 'Σωστό' : 'Λάθος'}</p>
+                            <p style={{ fontSize: '8px', color: 'var(--pastel-blue)' }}>{m.explanation}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : <p style={{ textAlign: 'center', color: '#00ff00', marginTop: '20px' }}>Απόλυτο Άριστα!</p>}
 
-                  <button className="action-btn" onClick={() => setQuizState('menu')} style={{ marginTop: '20px', width: '100%' }}>BACK TO MENU</button>
-                </div>
-              )}
+                    {/* Μόνο αν το Quiz δεν είναι ήδη αποθηκευμένο, εμφανίζεται η επιλογή αποθήκευσης */}
+                    {!currentQuizId && (
+                      <div className="setup-group" style={{ marginTop: '20px' }}>
+                        <input type="text" className="retro-input" placeholder="Όνομα Quiz (π.χ. Ιστορία Κεφ 1)" value={quizTitle} onChange={e => setQuizTitle(e.target.value)} />
+                        <button className="action-btn start-btn" onClick={handleSaveQuiz}>SAVE QUIZ</button>
+                      </div>
+                    )}
+
+                    <button className="action-btn" onClick={() => setQuizState('menu')} style={{ marginTop: '20px', width: '100%' }}>BACK TO MENU</button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* --- ΥΠΟΛΟΙΠΑ MODALS (TIMER, TODO, STATS, GOALS ΠΑΡΑΜΕΝΟΥΝ ΙΔΙΑ) --- */}
-      {showTodoModal && (
-        <div className="modal-overlay">
-          <div className="retro-modal">
-            <div className="modal-header"><span>TO DO LIST</span><button className="close-btn" onClick={() => { setShowTodoModal(false); setTodoMode('menu'); }}>X</button></div>
-            <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-              {todoMode === 'menu' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <button className="action-btn" onClick={() => setTodoMode('add')} style={{ borderColor: 'var(--pastel-blue)', color: 'var(--pastel-blue)' }}>ADD NEW</button>
-                  <button className="action-btn" onClick={() => { setTodoMode('list'); fetchTodos(); }} style={{ borderColor: 'var(--pastel-pink)', color: 'var(--pastel-pink)' }}>SEE LIST</button>
-                </div>
-              )}
-              {todoMode === 'add' && (
-                <div className="setup-group">
-                  <input type="text" placeholder="Τίτλος..." className="retro-input" value={todoForm.title} onChange={e => setTodoForm({ ...todoForm, title: e.target.value })} />
-                  <input type="text" placeholder="Υποσημείωση..." className="retro-input" value={todoForm.description} onChange={e => setTodoForm({ ...todoForm, description: e.target.value })} />
-                  <label style={{ fontSize: '8px', color: 'var(--pastel-pink)' }}>Deadline:</label>
-                  <input type="date" className="retro-input" value={todoForm.deadline} onChange={e => setTodoForm({ ...todoForm, deadline: e.target.value })} />
-                  <button className="action-btn start-btn" onClick={handleAddTodo}>SAVE TASK</button>
-                  <button className="action-btn" onClick={() => setTodoMode('menu')} style={{ marginTop: '10px' }}>BACK</button>
-                </div>
-              )}
-              {todoMode === 'list' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  {todos.length === 0 ? <p style={{ textAlign: 'center', fontSize: '10px', color: 'var(--pastel-blue)' }}>Δεν έχεις εργασίες!</p> : (
-                    <div className="todo-list">{todos.map(todo => (<div key={todo.id} className="todo-item"><div className="todo-content"><span className="todo-title">{todo.title}</span>{todo.description && <span className="todo-desc">{todo.description}</span>}{todo.deadline && <span className="todo-date">ΕΩΣ: {todo.deadline}</span>}</div><button className="nav-btn" style={{ borderColor: '#00ff00', color: '#00ff00' }} onClick={() => handleCompleteTodo(todo.id)}>V</button></div>))}</div>
-                  )}
-                  <button className="action-btn" onClick={() => setTodoMode('menu')} style={{ marginTop: '10px' }}>BACK</button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showGoalsModal && (
-        <div className="modal-overlay">
-          <div className="retro-modal">
-            <div className="modal-header">
-              <div className="month-nav"><button className="nav-btn" onClick={() => setWeekStart(new Date(weekStart.setDate(weekStart.getDate() - 7)))}>&lt;</button><span style={{ fontSize: '8px' }}>{weekDays[0].getDate()}-{weekDays[6].getDate()} {currentMonth}</span><button className="nav-btn" onClick={() => setWeekStart(new Date(weekStart.setDate(weekStart.getDate() + 7)))}>&gt;</button></div>
-              <button className="close-btn" onClick={() => setShowGoalsModal(false)}>X</button>
-            </div>
-            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-              <div className="setup-group">
-                <label style={{ color: 'var(--pastel-blue)' }}>STUDY HOURS:</label><input type="number" min="0" className="retro-input" value={goalsForm.Study} onChange={e => setGoalsForm({ ...goalsForm, Study: e.target.value })} />
-                <label style={{ color: 'var(--pastel-pink)' }}>WORKOUT HOURS:</label><input type="number" min="0" className="retro-input" value={goalsForm.Workout} onChange={e => setGoalsForm({ ...goalsForm, Workout: e.target.value })} />
-                <label style={{ color: 'var(--pastel-purple)' }}>HOBBY HOURS:</label><input type="number" min="0" className="retro-input" value={goalsForm.Hobby} onChange={e => setGoalsForm({ ...goalsForm, Hobby: e.target.value })} />
-                <button className="action-btn start-btn" onClick={handleSaveGoals} style={{ marginTop: '10px' }}>SAVE GOALS</button>
-              </div>
-              <hr style={{ borderColor: 'var(--border-color)', margin: '20px 0', width: '100%' }} />
-              <div className="goals-progress-list">
-                {['Study', 'Workout', 'Hobby'].map(act => {
-                  const target = savedGoals[act] || 0; const current = currentWeeklyTotals[act] || 0; const perc = getProgressPercentage(current, target); const isCompleted = target > 0 && current >= target;
-                  return (
-                    <div key={act} className="goal-progress-item">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', marginBottom: '5px' }}><span>{act}</span><span>{current.toFixed(1)} / {target}h</span></div>
-                      <div className="level-bar-container" style={{ width: '100%', height: '15px' }}><div className={`goal-progress-fill bg-${act.toLowerCase()}`} style={{ width: `${animateGoals ? perc : 0}%` }}></div></div>
-                      {isCompleted && (
-                        <div style={{ textAlign: 'center', marginTop: '5px' }}><p style={{ color: '#00ff00', fontSize: '8px', animation: 'retroSlideIn 0.5s' }}>ΜΠΡΑΒΟ! Ξεπέρασες τον στόχο σου!</p>
-                          {!claimedGoals.includes(act) && <button className="nav-btn" style={{ borderColor: '#ffcc00', color: '#ffcc00', fontSize: '7px', marginTop: '5px' }} onClick={() => { addXP(50); setClaimedGoals(prev => [...prev, act]); }}>CLAIM 50 XP</button>}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showTimerModal && (
-        <div className="modal-overlay">
-          <div className="retro-modal">
-            <div className="modal-header"><span>TIMER</span><button className="close-btn" onClick={() => setShowTimerModal(false)}>X</button></div>
-            <div className="modal-body">
-              {timerMode === 'setup' ? (
-                <>
-                  <div className="setup-group"><label>MINUTES:</label><input type="number" value={inputMinutes} onChange={(e) => setInputMinutes(e.target.value)} min="1" className="retro-input" /></div>
-                  <div className="setup-group"><label>ACTIVITY:</label><div className="activity-buttons">{['Study', 'Workout', 'Hobby'].map(act => (<button key={act} className={`act-btn ${activity === act ? 'active' : ''}`} onClick={() => setActivity(act)}>{act}</button>))}</div></div>
-                  <button className="action-btn start-btn" onClick={startTimer}>START</button>
-                </>
-              ) : (
-                <div className="active-timer">
-                  <div className="current-activity">{activity}</div><div className="time-display">{formatTime(timeLeft)}</div>
-                  <div className="timer-controls">
-                    <button className="action-btn" onClick={() => setTimerMode(prev => prev === 'running' ? 'paused' : 'running')}>{timerMode === 'paused' ? 'RESUME' : 'PAUSE'}</button>
-                    <button className="action-btn stop-btn" onClick={stopTimer}>STOP</button>
+      {
+        showTodoModal && (
+          <div className="modal-overlay">
+            <div className="retro-modal">
+              <div className="modal-header"><span>TO DO LIST</span><button className="close-btn" onClick={() => { setShowTodoModal(false); setTodoMode('menu'); }}>X</button></div>
+              <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                {todoMode === 'menu' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <button className="action-btn" onClick={() => setTodoMode('add')} style={{ borderColor: 'var(--pastel-blue)', color: 'var(--pastel-blue)' }}>ADD NEW</button>
+                    <button className="action-btn" onClick={() => { setTodoMode('list'); fetchTodos(); }} style={{ borderColor: 'var(--pastel-pink)', color: 'var(--pastel-pink)' }}>SEE LIST</button>
                   </div>
-                </div>
-              )}
+                )}
+                {todoMode === 'add' && (
+                  <div className="setup-group">
+                    <input type="text" placeholder="Τίτλος..." className="retro-input" value={todoForm.title} onChange={e => setTodoForm({ ...todoForm, title: e.target.value })} />
+                    <input type="text" placeholder="Υποσημείωση..." className="retro-input" value={todoForm.description} onChange={e => setTodoForm({ ...todoForm, description: e.target.value })} />
+                    <label style={{ fontSize: '8px', color: 'var(--pastel-pink)' }}>Deadline:</label>
+                    <input type="date" className="retro-input" value={todoForm.deadline} onChange={e => setTodoForm({ ...todoForm, deadline: e.target.value })} />
+                    <button className="action-btn start-btn" onClick={handleAddTodo}>SAVE TASK</button>
+                    <button className="action-btn" onClick={() => setTodoMode('menu')} style={{ marginTop: '10px' }}>BACK</button>
+                  </div>
+                )}
+                {todoMode === 'list' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    {todos.length === 0 ? <p style={{ textAlign: 'center', fontSize: '10px', color: 'var(--pastel-blue)' }}>Δεν έχεις εργασίες!</p> : (
+                      <div className="todo-list">
+                        {/* Ταξινομούμε τα todos ώστε τα completed να πάνε στο τέλος */}
+                        {[...todos].sort((a, b) => (a.completed ? 1 : 0) - (b.completed ? 1 : 0)).map(todo => (
+                          <div key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+                            <div className="todo-content">
+                              <span className="todo-title">{todo.title}</span>
+                              {todo.description && <span className="todo-desc">{todo.description}</span>}
+                              {todo.deadline && <span className="todo-date">ΕΩΣ: {todo.deadline}</span>}
+                            </div>
+                            {!todo.completed ? (
+                              <button className="nav-btn" style={{ borderColor: '#00ff00', color: '#00ff00' }} onClick={() => handleCompleteTodo(todo.id)}>V</button>
+                            ) : (
+                              <span style={{ fontSize: '10px', color: '#00ff00' }}>DONE</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <button className="action-btn" onClick={() => setTodoMode('menu')} style={{ marginTop: '10px' }}>BACK</button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
-      {showStatsModal && (
-        <div className="modal-overlay">
-          <div className="retro-modal stats-modal">
-            <div className="modal-header">
-              <div className="month-nav"><button className="nav-btn" onClick={() => setWeekStart(new Date(weekStart.setDate(weekStart.getDate() - 7)))}>&lt;</button><span style={{ fontSize: '10px' }}>{currentMonth} {currentYear}</span><button className="nav-btn" onClick={() => setWeekStart(new Date(weekStart.setDate(weekStart.getDate() + 7)))}>&gt;</button></div>
-              <button className="close-btn" onClick={() => setShowStatsModal(false)}>X</button>
-            </div>
-            <div className="modal-body">
-              <div className="chart-legend"><span className="legend-item"><div className="color-box bg-study"></div>Study</span><span className="legend-item"><div className="color-box bg-workout"></div>Workout</span><span className="legend-item"><div className="color-box bg-hobby"></div>Hobby</span></div>
-              <div className="chart-container">
-                <div className="y-axis"><span>8h</span><span>6h</span><span>4h</span><span>2h</span><span>0h</span></div>
-                <div className="bars-area">
-                  {weekDays.map((dateObj) => {
-                    const dateStr = formatDateStr(dateObj); const dayData = stats[dateStr] || { Study: 0, Workout: 0, Hobby: 0 }; const MAX_HOURS = 8;
-                    const studyHeight = (dayData.Study / MAX_HOURS) * 100; const workoutHeight = (dayData.Workout / MAX_HOURS) * 100; const hobbyHeight = (dayData.Hobby / MAX_HOURS) * 100;
+      {
+        showGoalsModal && (
+          <div className="modal-overlay">
+            <div className="retro-modal">
+              <div className="modal-header">
+                <div className="month-nav"><button className="nav-btn" onClick={() => setWeekStart(new Date(weekStart.setDate(weekStart.getDate() - 7)))}>&lt;</button><span style={{ fontSize: '8px' }}>{weekDays[0].getDate()}-{weekDays[6].getDate()} {currentMonth}</span><button className="nav-btn" onClick={() => setWeekStart(new Date(weekStart.setDate(weekStart.getDate() + 7)))}>&gt;</button></div>
+                <button className="close-btn" onClick={() => setShowGoalsModal(false)}>X</button>
+              </div>
+              <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+                <div className="setup-group">
+                  <label style={{ color: 'var(--pastel-blue)' }}>STUDY HOURS:</label><input type="number" min="0" className="retro-input" value={goalsForm.Study} onChange={e => setGoalsForm({ ...goalsForm, Study: e.target.value })} />
+                  <label style={{ color: 'var(--pastel-pink)' }}>WORKOUT HOURS:</label><input type="number" min="0" className="retro-input" value={goalsForm.Workout} onChange={e => setGoalsForm({ ...goalsForm, Workout: e.target.value })} />
+                  <label style={{ color: 'var(--pastel-purple)' }}>HOBBY HOURS:</label><input type="number" min="0" className="retro-input" value={goalsForm.Hobby} onChange={e => setGoalsForm({ ...goalsForm, Hobby: e.target.value })} />
+                  <button className="action-btn start-btn" onClick={handleSaveGoals} style={{ marginTop: '10px' }}>SAVE GOALS</button>
+                </div>
+                <hr style={{ borderColor: 'var(--border-color)', margin: '20px 0', width: '100%' }} />
+                <div className="goals-progress-list">
+                  {['Study', 'Workout', 'Hobby'].map(act => {
+                    const target = savedGoals[act] || 0; const current = currentWeeklyTotals[act] || 0; const perc = getProgressPercentage(current, target); const isCompleted = target > 0 && current >= target;
                     return (
-                      <div className="bar-column" key={dateStr}>
-                        <div className="bar-wrapper tooltip-container">
-                          <div className="bar segment-hobby" style={{ height: `${hobbyHeight}%` }}></div><div className="bar segment-workout" style={{ height: `${workoutHeight}%` }}></div><div className="bar segment-study" style={{ height: `${studyHeight}%` }}></div>
-                          <div className="retro-tooltip"><div className="t-study">S: {dayData.Study > 0 ? dayData.Study.toFixed(1) + 'h' : '0'}</div><div className="t-workout">W: {dayData.Workout > 0 ? dayData.Workout.toFixed(1) + 'h' : '0'}</div><div className="t-hobby">H: {dayData.Hobby > 0 ? dayData.Hobby.toFixed(1) + 'h' : '0'}</div></div>
-                        </div>
-                        <span className="day-label" style={{ textAlign: 'center', lineHeight: '1.2' }}>{dayNamesGreek[dateObj.getDay()]}<br />{dateObj.getDate()}</span>
+                      <div key={act} className="goal-progress-item">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', marginBottom: '5px' }}><span>{act}</span><span>{current.toFixed(1)} / {target}h</span></div>
+                        <div className="level-bar-container" style={{ width: '100%', height: '15px' }}><div className={`goal-progress-fill bg-${act.toLowerCase()}`} style={{ width: `${animateGoals ? perc : 0}%` }}></div></div>
+                        {isCompleted && (
+                          <div style={{ textAlign: 'center', marginTop: '5px' }}><p style={{ color: '#00ff00', fontSize: '8px', animation: 'retroSlideIn 0.5s' }}>ΜΠΡΑΒΟ! Ξεπέρασες τον στόχο σου!</p>
+                            {!claimedGoals.includes(act) && <button className="nav-btn" style={{ borderColor: '#ffcc00', color: '#ffcc00', fontSize: '7px', marginTop: '5px' }} onClick={() => { addXP(50); setClaimedGoals(prev => [...prev, act]); }}>CLAIM 50 XP</button>}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -549,9 +546,70 @@ function App() {
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+
+      {
+        showTimerModal && (
+          <div className="modal-overlay">
+            <div className="retro-modal">
+              <div className="modal-header"><span>TIMER</span><button className="close-btn" onClick={() => setShowTimerModal(false)}>X</button></div>
+              <div className="modal-body">
+                {timerMode === 'setup' ? (
+                  <>
+                    <div className="setup-group"><label>MINUTES:</label><input type="number" value={inputMinutes} onChange={(e) => setInputMinutes(e.target.value)} min="1" className="retro-input" /></div>
+                    <div className="setup-group"><label>ACTIVITY:</label><div className="activity-buttons">{['Study', 'Workout', 'Hobby'].map(act => (<button key={act} className={`act-btn ${activity === act ? 'active' : ''}`} onClick={() => setActivity(act)}>{act}</button>))}</div></div>
+                    <button className="action-btn start-btn" onClick={startTimer}>START</button>
+                  </>
+                ) : (
+                  <div className="active-timer">
+                    <div className="current-activity">{activity}</div><div className="time-display">{formatTime(timeLeft)}</div>
+                    <div className="timer-controls">
+                      <button className="action-btn" onClick={() => setTimerMode(prev => prev === 'running' ? 'paused' : 'running')}>{timerMode === 'paused' ? 'RESUME' : 'PAUSE'}</button>
+                      <button className="action-btn stop-btn" onClick={stopTimer}>STOP</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {
+        showStatsModal && (
+          <div className="modal-overlay">
+            <div className="retro-modal stats-modal">
+              <div className="modal-header">
+                <div className="month-nav"><button className="nav-btn" onClick={() => setWeekStart(new Date(weekStart.setDate(weekStart.getDate() - 7)))}>&lt;</button><span style={{ fontSize: '10px' }}>{currentMonth} {currentYear}</span><button className="nav-btn" onClick={() => setWeekStart(new Date(weekStart.setDate(weekStart.getDate() + 7)))}>&gt;</button></div>
+                <button className="close-btn" onClick={() => setShowStatsModal(false)}>X</button>
+              </div>
+              <div className="modal-body">
+                <div className="chart-legend"><span className="legend-item"><div className="color-box bg-study"></div>Study</span><span className="legend-item"><div className="color-box bg-workout"></div>Workout</span><span className="legend-item"><div className="color-box bg-hobby"></div>Hobby</span></div>
+                <div className="chart-container">
+                  <div className="y-axis"><span>8h</span><span>6h</span><span>4h</span><span>2h</span><span>0h</span></div>
+                  <div className="bars-area">
+                    {weekDays.map((dateObj) => {
+                      const dateStr = formatDateStr(dateObj); const dayData = stats[dateStr] || { Study: 0, Workout: 0, Hobby: 0 }; const MAX_HOURS = 8;
+                      const studyHeight = (dayData.Study / MAX_HOURS) * 100; const workoutHeight = (dayData.Workout / MAX_HOURS) * 100; const hobbyHeight = (dayData.Hobby / MAX_HOURS) * 100;
+                      return (
+                        <div className="bar-column" key={dateStr}>
+                          <div className="bar-wrapper tooltip-container">
+                            <div className="bar segment-hobby" style={{ height: `${hobbyHeight}%` }}></div><div className="bar segment-workout" style={{ height: `${workoutHeight}%` }}></div><div className="bar segment-study" style={{ height: `${studyHeight}%` }}></div>
+                            <div className="retro-tooltip"><div className="t-study">S: {dayData.Study > 0 ? dayData.Study.toFixed(1) + 'h' : '0'}</div><div className="t-workout">W: {dayData.Workout > 0 ? dayData.Workout.toFixed(1) + 'h' : '0'}</div><div className="t-hobby">H: {dayData.Hobby > 0 ? dayData.Hobby.toFixed(1) + 'h' : '0'}</div></div>
+                          </div>
+                          <span className="day-label" style={{ textAlign: 'center', lineHeight: '1.2' }}>{dayNamesGreek[dateObj.getDay()]}<br />{dateObj.getDate()}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    </div >
   );
 }
 
